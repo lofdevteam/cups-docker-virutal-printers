@@ -1,0 +1,32 @@
+version: "3"
+services:
+    cups:
+      image: anujdatar/cups
+      container_name: cups
+      restart: unless-stopped
+      ports:
+          - 631
+      devices:
+          - /dev/bus/usb:/dev/bus/usb
+      environment:
+          - CUPSADMIN=landofcoder
+          - CUPSPASSWORD=landofcoder
+          - TZ="Europe/Berlin"
+      volumes:
+          - ./etc:/etc/cups
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.printcups.rule=Host(`printers.localhost`)"
+        - "traefik.http.routers.printcups.entrypoints=web"
+        - "traefik.http.services.printcups.loadbalancer.server.port=631"
+        - "traefik.docker.network=proxy"
+      networks:
+        - proxy
+        - internal
+
+networks:
+  proxy:
+    external:
+      name: proxy
+  internal:
+    driver: bridge
